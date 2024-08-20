@@ -1,0 +1,192 @@
+{% extends 'partials\base.html'%}
+{% load static %}
+{% load humanize %}
+{% block title %}
+<title>Products BLUST BY DR MA</title>
+{% endblock title %}
+{%block extra-css%}
+    <link rel="stylesheet" href="{% static 'assets/css/product-list.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/product-card.css' %}">
+{%endblock extra-css%}
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row filter-row g-3">
+        <div class="col-md-3">
+            <div class="filter-card">
+                <h5 class="filter-title">By Categories</h5>
+                {% for category in categories %}
+                <div class="filter-options">
+                    <div class="form-check">
+                        <input data-filter="category" class="form-check-input filter-checkbox" type="checkbox" name="checkbox" id="categoryfilter" value="{{category.cid}}">
+                        <a href="{% url 'core:subcategory-list' category.cid %}"><label class="form-check-label" for="category">{{category.category_title}}</label></a>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="filter-card">
+                <h5 class="filter-title">By Vendors</h5>
+                {% for vendor in vendors %}
+                <div class="filter-options">
+                    <div class="form-check">
+                        <input data-filter="vendor" class="form-check-input filter-checkbox" type="checkbox" name="checkbox" id="vendorfilter" value="{{vendor.vid}}">
+                        <a href="{% url 'core:vendor-detail' vendor.vid %}"><label class="form-check-label" for="vendor">{{vendor.vendor_title}}</label></a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="filter-card">
+                <h5 class="filter-title">By Tags</h5>
+                <div class="tag-container mb-2">
+                    {% for tag in tags %}
+                        <a href="{% url 'core:tag-products' tag.slug %}"><span class="tag-item badge bg-secondary">{{tag.name}}</span></a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="filter-card">
+                <h5 class="filter-title">By Price</h5>
+                <form id="priceFilterForm">
+                    <div class="mb-3">
+                        <label for="priceSlider" class="form-label">Price Range: <span id="priceValue">sh.{{min_price}}</span></label>
+                        <input type="range" class="form-range" id="priceSlider" min="{{min_price|floatformat:2}}" max="{{max_price|floatformat:2}}" value="{{min_price}}">
+                        <div class="price-range">
+                            <span>From: <span class="price-span">{{min_price|floatformat:2}}</span></span>
+                            <span>To: <span class="price-span">{{max_price|floatformat:2}}</span></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">sh.</span>
+                            <input type="number" class="form-control" id="priceInput" min="{{min_price|floatformat:2}}" max="{{max_price|floatformat:2}}" value="{{min_price}}" placeholder="Enter price" aria-label="Price">
+                            <button class="btn btn-primary" type="button" id="filterButton">Filter</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center my-4">
+        <p>We found {{ products.count }} items for you!</p>
+        <div class="d-flex">
+            <select id="sort-select" class="form-select">
+                <option value="updated">Sort by: Featured</option>
+                <option value="price_asc">Sort by: Price (Low to High)</option>
+                <option value="price_desc">Sort by: Price (High to Low)</option>
+            </select>
+        </div>
+    </div>
+    <main class=" container main bd-grid">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="filtered-products">
+            {% for p in products %}
+            <div class="col">
+                <article class="card">
+                    <a href="{% url 'core:product-detail' p.pid %}" class="text-decoration-none text-dark">
+                        <div class="card__img">
+                            <img src="{{ p.product_image.url }}" alt="{{ p.product_title }}">
+                        </div>
+                        <div class="card__name">
+                            <p>{{ p.product_title }}</p>
+                        </div>
+                        <div class="card__content">
+                            <p class="card__description fw-bolder">{{ p.product_title|truncatechars:20 }}</p>
+                            <p class="card__specification">{{ p.specification }}</p>
+                            <div class="card__stock {% if p.is_low_stock %}low-stock{% endif %}">
+                                {% if p.in_stock %}
+                                    {% if p.is_low_stock %}
+                                        Low Stock: {{ p.available_stock }} left
+                                    {% else %}
+                                        In Stock: {{ p.available_stock }} available
+                                    {% endif %}
+                                {% else %}
+                                    Out of Stock
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card__precis">
+                            <div class="card__price">
+                                {% if p.discounted_price < p.normal_price %}
+                                    <span class="card__preci card__preci--now">sh.{{ p.discounted_price|intcomma }}</span>
+                                    <span class="card__preci card__preci--before">sh.{{ p.normal_price|intcomma }}</span>
+                                    <span class="card__discount">-{{ p.get_percent_discount }}%</span>
+                                {% else %}
+                                    <span class="card__preci card__preci--now">sh.{{ p.normal_price|intcomma }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    <div class="card__actions">
+                        <a href="" class="card__icon" title="Add to wishlist"><ion-icon name="heart-outline"></ion-icon></a>
+                        <a href="" class="card__icon" title="Add to cart"><ion-icon name="cart-outline"></ion-icon></a>
+                        <a href="" class="card__icon" title="Compare"><ion-icon name="git-compare-outline"></ion-icon></a>
+                    </div>
+                </article>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+    
+    <!--Customer reviews-->
+    <h2 class="text-center mb-4 mt-5">Customer Reviews</h2>
+    <div class="row">
+        <!-- Review 1 -->
+        <div class="col-md-4 mb-4">
+            <div class="card review">
+                <div class="card-body">
+                    <h5 class="card-title">Great Product!</h5>
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet.</p>
+                    <div class="text-warning mb-2">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-half"></i>
+                    </div>
+                    <small class="text-muted">- John Doe</small>
+                </div>
+            </div>
+        </div>
+        <!-- Review 2 -->
+        <div class="col-md-4 mb-4">
+            <div class="card review">
+                <div class="card-body">
+                    <h5 class="card-title">Excellent Service</h5>
+                    <p class="card-text">Proin eget tortor risus. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus.</p>
+                    <div class="text-warning mb-2">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <small class="text-muted">- Jane Smith</small>
+                </div>
+            </div>
+        </div>
+        <!-- Review 3 -->
+        <div class="col-md-4 mb-4">
+            <div class="card review">
+                <div class="card-body">
+                    <h5 class="card-title">Good Value</h5>
+                    <p class="card-text">Vivamus suscipit tortor eget felis porttitor volutpat. Nulla quis lorem ut libero malesuada feugiat.</p>
+                    <div class="text-warning mb-2">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star"></i>
+                    </div>
+                    <small class="text-muted">- Mike Johnson</small>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{%block extra-script%}
+<script src="{%static 'assets/JS/filter-product.js'%}"></script>
+{%endblock extra-script%}>

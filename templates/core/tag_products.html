@@ -1,0 +1,34 @@
+{% extends "partials/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Products tagged with "{{ tag.name }}"</h1>
+
+    {% if products %}
+        <div class="row">
+            {% for product in products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.product_title }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.product_title }}</h5>
+                            <p class="card-text">
+                            {% if product.discounted_price < product.normal_price %}
+                                <h2 class="mb-2">sh.{{ product.discounted_price }}</h2>
+                                <p class="mb-1"><span class="text-danger"><del>sh.{{ product.normal_price }}</del></span></p>
+                                <p class="text-muted">{{ product.get_percent_discount }}% off</p>
+                            {% else %}
+                                <h2 class="mb-2">sh.{{ product.normal_price }}</h2>
+                            {% endif %}
+                            </p>
+                            <a href="{% url 'core:product-detail' product.pid %}" class="btn btn-primary">View Product</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No products found for this tag.</p>
+    {% endif %}
+</div>
+{% endblock %}

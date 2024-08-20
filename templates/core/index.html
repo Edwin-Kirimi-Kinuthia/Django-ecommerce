@@ -1,23 +1,156 @@
-{% extends 'partials\base.html'%}
+{% extends 'partials/base.html'%}
 {% load static %}
+{% load humanize %}
+{% block title %}
+<title>BLUST BY DR MA</title>
+{% endblock title %}
+
+{%block extra-css%}
+    <link rel="stylesheet" href="{% static 'assets/css/product-card.css' %}">
+{%endblock extra-css%}
+
+{%block flyer%}
+<!-- Carousel -->
+<div id="carouselExampleIndicators" class="carousel slide position-relative" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        {% for b in banners %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            <img src="{{b.banner_image.url}}" class="d-block w-100" alt="banner image" style="width: 1300px; height: 400px;">
+        </div>
+        {% endfor %}
+    </div>
+    <div class="carousel-indicators">
+        {% for b in banners %}
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
+        {% endfor %}
+    </div>
+    <!-- Overlay Form -->
+    <div class="carousel-overlay">
+        <h3 class="mb-3">Stay Updated!</h3>
+        <form>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" placeholder="name@example.com">
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" placeholder="Your Name">
+            </div>
+            <button type="submit" class="btn btn-primary">Subscribe</button>
+        </form>
+    </div>
+</div>
+<!-- end overlay form-->
+
+{%endblock flyer%}
+
 {% block content %}
-                <!-- Products -->
-                <div class="container mt-5">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="card">
-                                <img src="{% static '\assets\images\products\soap.jpg' %}" class="card-img-top" alt="Product 1" width="250" height="200">
-                                <div class="card-body">
-                                    <h5 class="card-title">Product 1</h5>
-                                    <p class="card-text">$10.00</p>
-                                    <a href="#" class="btn btn-primary">Add to Cart</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<!--Products section-->
+<h1 class="text-center mb-4 fw-bolder">Featured Products</h1>
+<main class=" container main bd-grid">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for p in products %}
+<div class="col">
+    <article class="card">
+        <a href="{% url 'core:product-detail' p.pid %}" class="text-decoration-none text-dark">
+            <div class="card__img">
+                <img src="{{p.product_image.url}}" alt="{{p.product_title}}">
+            </div>
+            <div class="card__name">
+                <p>{{p.product_title}}</p>
+            </div>
+            <div class="card__content">
+                <p class="card__description fw-bolder">{{p.product_title|truncatechars:20}}</p>
+                <p class="card__specification">{{p.specification}}</p>
+                <div class="card__stock {% if p.is_low_stock %}low-stock{% endif %}">
+                    {% if p.in_stock %}
+                        {% if p.is_low_stock %}
+                            Low Stock: {{p.available_stock}} left
+                        {% else %}
+                            In Stock: {{p.available_stock}} available
+                        {% endif %}
+                    {% else %}
+                        Out of Stock
+                    {% endif %}
                 </div>
+            </div>
+            <div class="card__precis">
+                <div class="card__price">
+                    {% if p.discounted_price < p.normal_price %}
+                        <span class="card__preci card__preci--now">sh.{{p.discounted_price|intcomma}}</span>
+                        <span class="card__preci card__preci--before">sh.{{p.normal_price|intcomma}}</span>
+                        <span class="card__discount">-{{p.get_percent_discount}}%</span>
+                    {% else %}
+                        <span class="card__preci card__preci--now">sh.{{p.normal_price|intcomma}}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        <div class="card__actions">
+            <a href="" class="card__icon" title="Add to wishlist"><ion-icon name="heart-outline"></ion-icon></a>
+            <a href="" class="card__icon" title="Add to cart"><ion-icon name="cart-outline"></ion-icon></a>
+            <a href="" class="card__icon" title="Compare"><ion-icon name="git-compare-outline"></ion-icon></a>
+        </div>
+    </article>
+</div>
+{% endfor %}
+    </div>
+</main>
+
+<!--Customer reviews-->
+<h2 class="text-center mb-4 mt-5">Customer Reviews</h2>
+<div class="row">
+    <!-- Review 1 -->
+    <div class="col-md-4 mb-4">
+        <div class="card review">
+            <div class="card-body">
+                <h5 class="card-title">Great Product!</h5>
+                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet.</p>
+                <div class="text-warning mb-2">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-half"></i>
+                </div>
+                <small class="text-muted">- John Doe</small>
             </div>
         </div>
     </div>
+    <!-- Review 2 -->
+    <div class="col-md-4 mb-4">
+        <div class="card review">
+            <div class="card-body">
+                <h5 class="card-title">Excellent Service</h5>
+                <p class="card-text">Proin eget tortor risus. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus.</p>
+                <div class="text-warning mb-2">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                </div>
+                <small class="text-muted">- Jane Smith</small>
+            </div>
+        </div>
+    </div>
+    <!-- Review 3 -->
+    <div class="col-md-4 mb-4">
+        <div class="card review">
+            <div class="card-body">
+                <h5 class="card-title">Good Value</h5>
+                <p class="card-text">Vivamus suscipit tortor eget felis porttitor volutpat. Nulla quis lorem ut libero malesuada feugiat.</p>
+                <div class="text-warning mb-2">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star"></i>
+                </div>
+                <small class="text-muted">- Mike Johnson</small>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
     

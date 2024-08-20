@@ -1,0 +1,44 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block title %}
+<title>{{ category.category_title }} Subcategories - BLUST BY DR MA</title>
+{% endblock title %}
+
+{% block extra-css %}
+<link rel="stylesheet" href="{% static 'assets/css/subcategory-card.css' %}">
+{% endblock extra-css %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:category-list' %}">Categories</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ category.category_title }}</li>
+    </ol>
+</nav>
+
+<h2 class="text-center mb-4">{{ category.category_title }} Subcategory ({{subcategories.count}})</h2>
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for subcategory in subcategories %}
+        <div class="col">
+            <div class="card h-100 subcategory-card">
+                <div class="card-img-container">
+                    {% if subcategory.subcategory_image %}
+                    <img src="{{ subcategory.subcategory_image.url }}" class="card-img-top" alt="{{ subcategory.subcategory_title }}">
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ subcategory.subcategory_title }}</h5>
+                    <a href="{% url 'core:product-by-subcategory' subcategory.scid %}" class="btn btn-primary">View Products</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center">No subcategories found for this category.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

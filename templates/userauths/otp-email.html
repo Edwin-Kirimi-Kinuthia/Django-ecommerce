@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your OTP Code and Verification Link</title>
+</head>
+<body>
+    <p>Hello {{ user.username }},</p>
+    <p>Your OTP code is: {{ otp }}</p>
+    <p>This OTP will expire in  15 minutes.</p>
+    <p>Please use the following link to verify your email:</p>
+    <p><a href="{{ verification_link }}">{{ verification_link }}</a></p>
+    <p>Thank you!</p>
+</body>
+</html>

@@ -1,0 +1,97 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% load humanize %}
+
+{% block title %}
+ <title> {{ vendor.vendor_title }} - BLUST BY DR MA </title>
+{% endblock title %}
+
+{% block extra-css %}
+<link rel="stylesheet" href="{% static 'assets/css/vendor-detail.css' %}">
+{% endblock extra-css %}
+
+{% block content %}
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-md-4 mb-4">
+            <div class="vendor-image">
+                <img src="{{ vendor.vendor_image.url }}" alt="{{ vendor.vendor_title }}">
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h1>{{ vendor.vendor_title }}</h1>
+
+            <div class="d-flex align-items-center mb-3">
+                <div class="star-rating" data-rating="{{ vendor.rating }}"></div>
+                <span class="ms-2">Rating: {{ vendor.rating|floatformat:1 }}</span>
+            </div>
+
+            <p><strong>Address:</strong> {{ vendor.vendor_adress }}</p>
+            <p><strong>Contact:</strong> {{ vendor.vendor_contact }}</p>
+            <p><strong>Chat Response Time:</strong> {{ vendor.vendor_chat_resp_time }}</p>
+            <p><strong>Shipping On Time:</strong> {{ vendor.shipping_on_time }}</p>
+            <p><strong>Authenticity Rating:</strong> {{ vendor.authentic_rating }}</p>
+            <p><strong>Days for Return:</strong> {{ vendor.days_return }}</p>
+            <p><strong>Warranty Period:</strong> {{ vendor.warranty_period }}</p>
+
+            <p>{{ vendor.description }}</p>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h2 class="mb-4">Products by {{ vendor.vendor_title }} ({{products.count}})</h2>
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <img src="{{ product.product_image.url }}" alt="{{ product.product_title }}" class="product-image">
+                <div class="product-info">
+                    <h3 class="product-title">{{ product.product_title }}</h3>
+                    <p class="product-price">sh.{{ product.discounted_price|floatformat:2|intcomma }}</p>
+                    <a href="{% url 'core:product-detail' product.pid %}" class="btn-view-product">View Product</a>
+                </div>
+            </div>
+            {% empty %}
+            <p>No products available from this vendor at the moment.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h2 class="mb-4">Vendor Reviews</h2>
+
+        {% for review in reviews %}
+        <div class="review-card">
+            <div class="review-header">
+                <h5 class="review-author">{{ review.user.username }}</h5>
+                <div class="star-rating" data-rating="{{ review.rating }}"></div>
+            </div>
+            <p class="review-text">{{ review.review_text }}</p>
+            <small class="review-date">{{ review.created_at|date:"F d, Y" }}</small>
+        </div>
+        {% empty %}
+        <p>No reviews yet. Be the first to review this vendor!</p>
+        {% endfor %}
+
+        {% if user.is_authenticated and not existing_review %}
+        <div class="review-form">
+            <h3>Write a Review</h3>
+            <form method="post">
+                {% csrf_token %}
+                {{ review_form.as_p }}
+                <button type="submit" class="btn-submit-review">Submit Review</button>
+            </form>
+        </div>
+        {% elif not user.is_authenticated %}
+        <p>Please <a href="{% url 'userauths:sign-in' %}">log in</a> to write a review.</p>
+        {% else %}
+        <p>You have already reviewed this vendor.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra-script %}
+<script src="{% static 'assets/JS/vendor-detail.js' %}"></script>
+{% endblock extra-script %}

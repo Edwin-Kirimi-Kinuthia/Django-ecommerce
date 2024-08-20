@@ -1,0 +1,14 @@
+If you want to actually send emails in production, you'll need to set up an SMTP server or use a transactional email service. 
+For example, to use Gmail's SMTP server, you would use settings like these:
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-email-password'
+Replace 'your-email@gmail.com' and 'your-email-password' with your actual Gmail credentials. 
+Note that for Gmail, you might need to use an "App Password" instead of your regular password.
+If you're planning to use this in production, you'll want to set up a proper email backend. Popular choices include:
+-Using a transactional email service like SendGrid, Mailgun, or Amazon SES.
+-Setting up your own SMTP server.
+-Using your hosting provider's email service, if available.

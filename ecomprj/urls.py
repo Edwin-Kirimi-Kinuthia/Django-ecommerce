@@ -23,7 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('user/', include('userauths.urls')),
-    path('auth/', include('social_django.urls', namespace='social')),
+    #text editor
+    path('tinymce/', include('tinymce.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root =settings.MEDIA_ROOT)

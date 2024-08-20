@@ -1,0 +1,33 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block title %}
+<title>Categories - BLUST BY DR MA</title>
+{% endblock title %}
+
+{% block extra-css %}
+<link rel="stylesheet" href="{% static 'assets/css/category-card.css' %}">
+{% endblock extra-css %}
+
+{% block content %}
+<h2 class="text-center mb-4">Browse All {{categories.count}} Categories</h2>
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for category in categories %}
+        <div class="col">
+            <div class="card h-100 category-card">
+                <div class="card-img-container">
+                    {% if category.category_image %}
+                    <img src="{{ category.category_image.url }}" class="card-img-top" alt="{{ category.category_title }}">
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ category.category_title }}</h5>
+                    <a href="{% url 'core:subcategory-list' category.cid %}" class="btn btn-primary">View Subcategories</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

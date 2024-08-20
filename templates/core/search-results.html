@@ -1,0 +1,66 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block title %}
+<title>Search: BLUST BY DR MA</title>
+{% endblock title %}
+
+{%block extra-css%}
+    <link rel="stylesheet" href="{% static 'assets/css/product-card.css' %}">
+{%endblock extra-css%}
+
+{% block content %}
+<main class=" container main bd-grid">
+<h2 class="mb-4">Search Results for "{{ query }}"</h2>
+
+    {% if results %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for product in results %}
+<div class="col">
+    <article class="card">
+        <a href="{% url 'core:product-detail' product.pid %}" class="text-decoration-none text-dark">
+            <div class="card__img">
+                <img src="{{product.product_image.url}}" alt="{{p.product_title}}">
+            </div>
+            <div class="card__name">
+                <p>{{product.product_title}}</p>
+            </div>
+            <div class="card__content">
+                <p class="card__description fw-bolder">{{product.product_title|truncatechars:20}}</p>
+                <p class="card__specification">{{product.specification}}</p>
+                <div class="card__stock {% if product.is_low_stock %}low-stock{% endif %}">
+                    {% if product.in_stock %}
+                        {% if product.is_low_stock %}
+                            Low Stock: {{product.available_stock}} left
+                        {% else %}
+                            In Stock: {{product.available_stock}} available
+                        {% endif %}
+                    {% else %}
+                        Out of Stock
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card__precis">
+                <div class="card__price">
+                    {% if product.discounted_price < product.normal_price %}
+                        <span class="card__preci card__preci--now">sh.{{product.discounted_price|intcomma}}</span>
+                        <span class="card__preci card__preci--before">sh.{{product.normal_price|intcomma}}</span>
+                        <span class="card__discount">-{{product.get_percent_discount}}%</span>
+                    {% else %}
+                        <span class="card__preci card__preci--now">sh.{{product.normal_price|intcomma}}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        <div class="card__actions">
+            <a href="" class="card__icon" title="Add to wishlist"><ion-icon name="heart-outline"></ion-icon></a>
+            <a href="" class="card__icon" title="Add to cart"><ion-icon name="cart-outline"></ion-icon></a>
+            <a href="" class="card__icon" title="Compare"><ion-icon name="git-compare-outline"></ion-icon></a>
+        </div>
+    </article>
+</div>
+{% endfor %}
+    </div>
+</main>
+{% endif %}
+{% endblock %}

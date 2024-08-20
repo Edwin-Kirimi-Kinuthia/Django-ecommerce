@@ -1,0 +1,64 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{%block title%} <title>BLUST BY DR MA-Profile</title> {%endblock title%}
+{% block extra-css %}  
+    <link rel="stylesheet" href="{% static 'assets/css/profile-pic.css' %}">
+{% endblock extra-css %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Profile Picture Section -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Profile Picture</h4>
+                </div>
+                <div class="card-body text-center">
+                    {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image.url }}" class="img-fluid rounded-circle mb-3" alt="Profile Picture" width="150" height="150">
+                    {% else %}
+                        <img src="{% static 'default_profile.jpg' %}" class="img-fluid rounded-circle mb-3" alt="Profile Picture" width="150" height="150">
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Update Form Section -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Update Profile</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity History Section -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Activity History</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <!-- Example activity history. Replace with actual data from your models -->
+                        <li class="list-group-item">Logged in on {{ user.last_login }}</li>
+                        <li class="list-group-item">Joined on {{ user.date_joined }}</li>
+                        <!-- Add more activity items as needed -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

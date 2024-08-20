@@ -17,35 +17,77 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    #Third paty
+    'widget_tweaks',
+    'django.contrib.humanize',
+    'tinymce',
+
     #custom apps
     'core.apps.CoreConfig',
     'userauths.apps.UserauthsConfig',
-    'social_django',
-    'django_recaptcha',
+    
 ]
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'social_core.backends.google.GoogleOAuth2',
-    'social_core.backends.facebook.FacebookOAuth2',
-    'social_core.backends.apple.AppleIdAuth',
 )
 
-# RECAPTCHA_PUBLIC_KEY = 'your-public-key'
-# RECAPTCHA_PRIVATE_KEY = 'your-private-key'
-SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#Tinymce
+TINYMCE_DEFAULT_CONFIG = {
+    'height': 360,
+    'width': 700,
+    'cleanup_on_startup': True,
+    'custom_undo_redo_levels': 20,
+    'selector': 'textarea',
+    'theme': 'modern',
+    'plugins': '''
+            save link image media preview codesample table code lists fullscreen insertdatetime nonbreaking
+            directionality searchreplace wordcount visualblocks visualchars code fullscreen autolink lists charmap print hr
+            anchor pagebreak
+            ''',
+    'toolbar1': '''
+            fullscreen preview bold italic underline | fontselect
+            fontsizeselect | alignleft alignright aligncenter alignjustify | indent outdent | bullist numlist table
+            | link image media | codesample
+            ''',
+    'toolbar2': '''
+            visualblocks visualchars | charmap hr pagebreak nonbreaking anchor | code
+            ''',
+    'contextmenu': 'formats | link image',
+    'menubar': True,
+    'statusbar': True,
+    'images_upload_url': '/upload_image/',
+    'automatic_uploads': True,
+    'file_picker_types': 'image',
+    'images_upload_handler': '''
+        function (blobInfo, success, failure) {
+            var xhr, formData;
+            xhr = new XMLHttpRequest();
+            xhr.withCredentials = false;
+            xhr.open('POST', '/upload_image/');
+            xhr.onload = function() {
+                var json;
+                if (xhr.status != 200) {
+                    failure('HTTP Error: ' + xhr.status);
+                    return;
+                }
+                json = JSON.parse(xhr.responseText);
+                if (!json || typeof json.location != 'string') {
+                    failure('Invalid JSON: ' + xhr.responseText);
+                    return;
+                }
+                success(json.location);
+            };
+            formData = new FormData();
+            formData.append('file', blobInfo.blob(), blobInfo.filename());
+            xhr.send(formData);
+        }
+    '''
+}
 
-
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = 'your-google-client-id'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'your-google-client-secret'
-
-SOCIAL_AUTH_FACEBOOK_KEY = 'your-facebook-app-id'
-SOCIAL_AUTH_FACEBOOK_SECRET = 'your-facebook-app-secret'
-
-SOCIAL_AUTH_APPLE_ID_CLIENT = 'your-apple-client-id'
-SOCIAL_AUTH_APPLE_ID_TEAM = 'your-apple-team-id'
-SOCIAL_AUTH_APPLE_ID_KEY = 'your-apple-key-id'
-SOCIAL_AUTH_APPLE_ID_SECRET = 'your-apple-key-secret'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -66,6 +108,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'core.context_processor.default',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',

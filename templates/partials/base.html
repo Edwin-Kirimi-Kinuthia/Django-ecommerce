@@ -1,222 +1,211 @@
 <!DOCTYPE html>
 {% load static %}
+{% load widget_tweaks %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLUST BY DR MA{% block title%}{% endblock title %}</title></title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'assets\css\styles.css' %}">
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    {%block title%} {%endblock title%}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{% static 'assets/css/styles.css' %}">
+    {%block extra-css%}{%endblock extra-css%}
 </head>
-
 <body>
-    <!-- Top Bar -->
-    <div class="container-fluid bg-light py-2">
+    <!-- Header -->
+    <header class="py-3 bg-light">
         <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <span>100% Secure delivery without contacting the courier</span>
+            <div class="row gy-3">
+                <div class="col-12 col-lg-2">
+                    <a href="{% url 'core:index' %}"> 
+                        <img src="{% static 'assets/images/logo/Blust logo.png' %}" alt="logo-image" class="brand-name img-fluid" style="max-width: 100px; height: auto;"> 
+                    </a>
                 </div>
-                <div class="col-md-6 text-right">
-                    <span>Need help? Call Us: 1800 900</span>
-                    <select class="ml-2">
-                        <option>English</option>
-                    </select>
-                    <select class="ml-2">
-                        <option>USD</option>
-                    </select>
+                <div class="col-12 col-lg-5">
+                    <form action="{% url 'core:search' %}" method="get" class="d-flex">
+                        {% render_field search_form.query class="form-control me-2" placeholder="Search all categories" aria-label="Search" %}
+                        <button class="btn btn-outline-dark" type="submit">Search</button>
+                    </form>
+                </div>
+                <div class="col-12 col-lg-5">
+                    <div class="d-flex justify-content-between flex-wrap">
+                        <div class="btn-group me-2 mb-2">
+                            <button class="btn btn-outline-dark dropdown-toggle" type="button" id="compareDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-arrow-repeat"></i> Compare
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="compareDropdown">
+                                <li><a class="dropdown-item" href="#">Product 1</a></li>
+                                <li><a class="dropdown-item" href="#">Product 2</a></li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-outline-dark me-2 mb-2" type="button">
+                            <i class="bi bi-cart-plus-fill"></i> Cart
+                        </button>
+                        <div class="btn-group me-2 mb-2">
+                            <button class="btn btn-outline-dark dropdown-toggle" type="button" id="wishlistDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-suit-heart-fill"></i> Wishlist
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="wishlistDropdown">
+                                <li><a class="dropdown-item" href="#">Item 1</a></li>
+                                <li><a class="dropdown-item" href="#">Item 2</a></li>
+                            </ul>
+                        </div>
+                        <div class="btn-group mb-2">
+                            <button class="btn btn-outline-dark dropdown-toggle" type="button" id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-fill"></i> Account
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="accountDropdown">
+                                {% if request.user.is_authenticated %}
+                                    <li><a class="dropdown-item" href="{% url 'userauths:profile-update' %}"><i class="bi bi-person"></i> My Account</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-geo"></i> Order Tracking</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-gift"></i> My Voucher</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-heart"></i> My Wishlist</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-sliders"></i> Settings</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'userauths:sign-out' %}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                                {% else %}
+                                    <li><a class="dropdown-item" href="{% url 'userauths:sign-up' %}"><i class="bi bi-person-plus"></i> Sign-up</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </header>
 
-<!-- Header -->
-<header class="container-fluid py-3">
-    <div class="row align-items-center">
-        <div class="col-lg-2 col-md-12 mb-2 mb-lg-0">
-            <h1 class="m-0 text-center text-lg-left">BLUST BY DR MA</h1>
-        </div>
-        <div class="col-lg-5 col-md-12 mb-2 mb-lg-0">
-            <form class="d-flex">
-                <select class="form-control mr-2 w-25">
-                    <option>All Categories</option>
-                </select>
-                <input class="form-control mr-2 flex-grow-1" type="search" placeholder="Search for items..." aria-label="Search">
-                <button class="btn btn-outline-primary" type="submit">Search</button>
-            </form>
-        </div>
-        <div class="col-lg-5 col-md-12">
-            <div class="d-flex flex-wrap justify-content-center justify-content-lg-end">
-                <a href="#" class="d-flex align-items-center mr-3 mb-2 mb-lg-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-repeat mr-1" viewBox="0 0 16 16">
-                        <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
-                        <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z"/>
-                    </svg>
-                    <span>Compare</span>
-                </a>
-                <a href="#" class="d-flex align-items-center mr-3 mb-2 mb-lg-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bag-heart-fill mr-1" viewBox="0 0 16 16">
-                        <path d="M11.5 4v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm0 6.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132z"/>
-                    </svg>
-                    <span>Wishlist</span>
-                </a>
-                <a href="#" class="d-flex align-items-center mr-3 mb-2 mb-lg-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cart4 mr-1" viewBox="0 0 16 16">
-                        <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l.5 2H5V5H3.14zM6 5v2h2V5H6zm3 0v2h2V5H9zm3 0v2h1.36l.5-2H12zm1.11 3H12v2h.61l.5-2zM11 8H9v2h2V8zM8 8H6v2h2V8zM5 8H3.89l.5 2H5V8zm0 5a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z"/>
-                    </svg>
-                    <span>Cart</span>
-                </a>
-                <a href="#" class="d-flex align-items-center mb-2 mb-lg-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person mr-1" viewBox="0 0 16 16">
-                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
-                    </svg>
-                    <span>Account</span>
-                </a>
-            </div>
-        </div>
-    </div>
-</header>
-
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<!-- navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-0">
         <div class="container-fluid">
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="browseCategories" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-bars"></i> Browse All Categories
-                </button>
-                <div class="dropdown-menu" aria-labelledby="browseCategories">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-            </div>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="homeDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Home</a>
-                        <div class="dropdown-menu" aria-labelledby="homeDropdown">
-                            <a class="dropdown-item" href="#">Home 1</a>
-                            <a class="dropdown-item" href="#">Home 2</a>
-                        </div>
-                    </li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#">About</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="shopDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
-                        <div class="dropdown-menu" aria-labelledby="shopDropdown">
-                            <a class="dropdown-item" href="#">Shop 1</a>
-                            <a class="dropdown-item" href="#">Shop 2</a>
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="vendorsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Vendors</a>
-                        <div class="dropdown-menu" aria-labelledby="vendorsDropdown">
-                            <a class="dropdown-item" href="#">Vendor 1</a>
-                            <a class="dropdown-item" href="#">Vendor 2</a>
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="megaMenuDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Mega Menu</a>
-                        <div class="dropdown-menu" aria-labelledby="megaMenuDropdown">
-                            <a class="dropdown-item" href="#">Menu 1</a>
-                            <a class="dropdown-item" href="#">Menu 2</a>
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="blogDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Blog</a>
-                        <div class="dropdown-menu" aria-labelledby="blogDropdown">
-                            <a class="dropdown-item" href="#">Blog 1</a>
-                            <a class="dropdown-item" href="#">Blog 2</a>
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="pagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Pages</a>
-                        <div class="dropdown-menu" aria-labelledby="pagesDropdown">
-                            <a class="dropdown-item" href="#">Page 1</a>
-                            <a class="dropdown-item" href="#">Page 2</a>
-                        </div>
-                    </li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#">Contact</a></li>
-                </ul>
-                <div class="ml-auto text-white">
-                    <i class="fas fa-headphones-alt text-white"></i> 1900 - 888
-                    <span class="ml-2">24/7 Support Center</span>
+            <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item ">
+                                <a class="nav-link text-white" href="{% url 'core:index' %}">Home</a>
+                            </li>
+                            <li class="nav-item ">
+                                <a class="nav-link text-white" href="{% url 'core:category-list' %}">Browse All Categories</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="{% url 'core:product-list' %}">Shop</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Categories
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
+                                    {% for category in categories %}
+                                    <li><a class="dropdown-item" href="{% url 'core:subcategory-list' category.cid %}">{{category.category_title}}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="vendorsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Vendors
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="vendorsDropdown">
+                                    {% for vendor in vendors %}
+                                    <li><a class="dropdown-item" href="{% url 'core:vendor-detail' vendor.vid %}">{{vendor.vendor_title}}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="megamenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Megamenu
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="megamenuDropdown">
+                                    <li><a class="dropdown-item" href="#">Megamenu 1</a></li>
+                                    <li><a class="dropdown-item" href="#">Megamenu 2</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="blogDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Blog
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="blogDropdown">
+                                    <li><a class="dropdown-item" href="#">Blog 1</a></li>
+                                    <li><a class="dropdown-item" href="#">Blog 2</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="pagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Pages
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="pagesDropdown">
+                                    <li><a class="dropdown-item" href="#">Page 1</a></li>
+                                    <li><a class="dropdown-item" href="#">Page 2</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#">Contact</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="navbar-text text-light d-none d-lg-flex align-items-center">
+                    <i class="bi bi-headphones fs-4 me-2"></i> Contact Support: +1 234 567 890
+                </div>
+            </div>
+    </nav>
+    {% if messages %}
+    <div class="mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    <script>
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 3000);
+    </script>
+{% endif %}
+    <!--main content-->
+    <main class="container my-5">
+        {%block flyer%}{%endblock flyer%}
+        {%block content%}{%endblock%}
+    </main>
+    <!--end main content-->
+    <footer class="footer py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2024 BLUST BY DR MA. All rights reserved.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5>Payment Methods</h5>
+                    <div class="payment-methods">
+                        <img src="{% static 'assets/images/logo/visa.jpg' %}" alt="Visa" class="payment-icon">
+                        <img src="{% static 'assets/images/logo/mastercard.png' %}" alt="MasterCard" class="payment-icon">
+                        <img src="{% static 'assets/images/logo/paypal.jpg' %}" alt="PayPal" class="payment-icon">
+                        <img src="{% static 'assets/images/logo/mpesa.png' %}" alt="American Express" class="payment-icon">
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <p class="text-center mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc id aliquam tincidunt, nisl nunc tincidunt urna, id lacinia nunc nunc id lectus.</p>
                 </div>
             </div>
         </div>
-    </nav>
-    <div class="container-fluid mt-3">
-        <div class="row">
-            <!-- Categories Section -->
-            <div class="col-md-2">
-                <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action active">Categories</a>
-                    <a href="#" class="list-group-item list-group-item-action">Milks & Dairies <span class="badge badge-secondary float-right">5</span></a>
-                    <a href="#" class="list-group-item list-group-item-action">Clothing <span class="badge badge-secondary float-right">7</span></a>
-                    <a href="#" class="list-group-item list-group-item-action">Pet Foods <span class="badge badge-secondary float-right">9</span></a>
-                    <a href="#" class="list-group-item list-group-item-action">Baking Material <span class="badge badge-secondary float-right">14</span></a>
-                    <a href="#" class="list-group-item list-group-item-action">Fresh Fruit <span class="badge badge-secondary float-right">13</span></a>
-                </div>
-            </div>
-    
-            <!-- Main Content -->
-            <div class="col-md-10">
-                <!-- Carousel with Email Form -->
-                <div class="position-relative">
-                    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
-                        <ol class="carousel-indicators">
-                            <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-                            <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-                            <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
-                        </ol>
-                        <div class="carousel-inner">
-                            <div class="carousel-item active">
-                                <img class="d-block w-100" src="{% static 'assets/images/banner/b1.jpg' %}" alt="First slide" width="1280" height="365">
-                            </div>
-                            <div class="carousel-item">
-                                <img class="d-block w-100" src="{% static 'assets/images/banner/b1.jpg' %}" alt="Second slide" width="1280" height="365">
-                            </div>
-                            <div class="carousel-item">
-                                <img class="d-block w-100" src="{% static 'assets/images/banner/b1.jpg' %}" alt="Third slide" width="1280" height="365">
-                            </div>
-                        </div>
-                        <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="sr-only">Previous</span>
-                        </a>
-                        <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="sr-only">Next</span>
-                        </a>
-                    </div>
-    
-                     <!-- Email Form Overlay -->
-                     <div class="position-relative carousel-overlay">
-                        <h3>Don't miss this amazing deals</h3>
-                        <p>Sign up for the daily newsletter</p>
-                        <form>
-                            <div class="input-group mb-3">
-                                <input type="email" class="form-control" placeholder="Your email address" aria-label="Your email address" aria-describedby="button-addon2">
-                                <div class="input-group-append">
-                                    <button class="btn btn-primary" type="button" id="button-addon2">Subscribe</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                {% block content%}{% endblock %}
-                <!-- Footer -->
-    <footer class="bg-dark text-white mt-5 p-4 text-center">
-        &copy; 2024 BLUST BY DR MA. All Rights Reserved.
     </footer>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.0.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule="" src="https://unpkg.com/ionicons@5.0.0/dist/ionicons/ionicons.js"></script>
     <script src="{% static 'assets/js/script.js' %}"></script>
+    {%block extra-script%}{%endblock extra-script%}
 </body>
-
 </html>

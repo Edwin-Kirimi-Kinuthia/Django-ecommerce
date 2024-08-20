@@ -1,0 +1,48 @@
+{% load static %}
+{% load humanize %}
+
+    {% for p in products %}
+    <div class="col">
+        <article class="card">
+            <a href="{% url 'core:product-detail' p.pid %}" class="text-decoration-none text-dark">
+                <div class="card__img">
+                    <img src="{{ p.product_image.url }}" alt="{{ p.product_title }}">
+                </div>
+                <div class="card__name">
+                    <p>{{ p.product_title }}</p>
+                </div>
+                <div class="card__content">
+                    <p class="card__description fw-bolder">{{ p.product_title|truncatechars:20 }}</p>
+                    <p class="card__specification">{{ p.specification }}</p>
+                    <div class="card__stock {% if p.is_low_stock %}low-stock{% endif %}">
+                        {% if p.in_stock %}
+                            {% if p.is_low_stock %}
+                                Low Stock: {{ p.available_stock }} left
+                            {% else %}
+                                In Stock: {{ p.available_stock }} available
+                            {% endif %}
+                        {% else %}
+                            Out of Stock
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card__precis">
+                    <div class="card__price">
+                        {% if p.discounted_price < p.normal_price %}
+                            <span class="card__preci card__preci--now">sh.{{ p.discounted_price|intcomma }}</span>
+                            <span class="card__preci card__preci--before">sh.{{ p.normal_price|intcomma }}</span>
+                            <span class="card__discount">-{{ p.get_percent_discount }}%</span>
+                        {% else %}
+                            <span class="card__preci card__preci--now">sh.{{ p.normal_price|intcomma }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            <div class="card__actions">
+                <a href="#" class="card__icon" title="Add to wishlist"><ion-icon name="heart-outline"></ion-icon></a>
+                <a href="#" class="card__icon" title="Add to cart"><ion-icon name="cart-outline"></ion-icon></a>
+                <a href="#" class="card__icon" title="Compare"><ion-icon name="git-compare-outline"></ion-icon></a>
+            </div>
+        </article>
+    </div>
+    {% endfor %}

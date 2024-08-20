@@ -1,0 +1,46 @@
+/* Custom styles for the sign-up page */
+.signup-container {
+    background-color: #f8f9fa;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 50px;
+}
+
+.signup-container h2 {
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.btn-block {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.social-buttons .btn {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.social-buttons .btn i {
+    margin-right: 5px;
+}
+
+.text-center {
+    margin-top: 20px;
+}
+
+/* Ensure responsiveness */
+@media (max-width: 576px) {
+    .signup-container {
+        padding: 20px;
+    }
+
+    .social-buttons .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
