@@ -31,7 +31,7 @@ class ProductReviewForm(forms.ModelForm):
 class VendorReviewForm(forms.ModelForm):
     class Meta:
         model = VendorReview
-        fields = ['vendor', 'review_text', 'rating']
+        fields = ['review_text', 'rating']
         widgets = {
             'review_text': TinyMCE(attrs={'rows': 10, 'cols': 80}),
             'rating': forms.Select(choices=RATING),
@@ -39,6 +39,5 @@ class VendorReviewForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(VendorReviewForm, self).__init__(*args, **kwargs)
-        self.fields['vendor'].widget.attrs.update({'class': 'form-control'})
         self.fields['review_text'].widget.attrs.update({'class': 'form-control'})
         self.fields['rating'].widget.attrs.update({'class': 'form-control'})

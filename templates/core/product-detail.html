@@ -72,12 +72,23 @@
                 {% endfor %}
             </div>
             {% if user.is_authenticated %}
-                <button class="btn btn-primary add-to-cart" data-product-id="{{ product.pid }}">Add to Cart</button>
-                <button class="btn btn-outline-primary add-to-wishlist" data-product-id="{{ product.pid }}">Add to Wishlist</button>
-                <a href="{% url 'core:buy-now' product.pid %}" class="btn btn-success">Buy Now</a>
-            {% else %}
-                <p>Please <a href="{% url 'userauths:sign-in' %}">log in</a> to add to cart, wishlist, or buy.</p>
-            {% endif %}
+            <div class="add-to-cart-container mb-3">
+                <div class="input-group">
+                    <input type="number" class="form-control quantity-input" value="1" min="1" max="{{ product.available_stock }}">
+                    <button class="btn btn-primary add-to-cart" 
+                            data-product-id="{{ product.pid }}"
+                            data-product-name="{{ product.product_title }}"
+                            data-product-price="{{ product.discounted_price|floatformat:2 }}">
+                        Add to Cart
+                    </button>
+                </div>
+                <small class="text-muted">Available stock: {{ product.available_stock }}</small>
+            </div>
+            <button class="btn btn-outline-secondary add-to-wishlist" data-product-id="{{ product.pid }}">Add to Wishlist</button>
+            <a href="{% url 'core:buy-now' product.pid %}" class="btn btn-success">Buy Now</a>
+        {% else %}
+            <p>Please <a href="{% url 'userauths:sign-in' %}">log in</a> to add to cart, wishlist, or buy.</p>
+        {% endif %}
         </div>
     </div>
 
@@ -141,18 +152,34 @@
     </div>
 
     <div class="row mt-5">
-        <h3>Related Products</h3>
+        <h3 class="mb-4">Related Products</h3>
         {% for related_product in related_products %}
-            <div class="col-md-3 mb-4">
-                <div class="card h-100">
+        <div class="col-6 col-md-3 mb-4">
+            <div class="card h-100 product-card">
+                <div class="card-img-container">
+                    {% if related_product.product_image %}
                     <img src="{{ related_product.product_image.url }}" class="card-img-top" alt="{{ related_product.product_title }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ related_product.product_title }}</h5>
-                        <p class="card-text">sh.{{ related_product.discounted_price }}</p>
-                        <a href="{% url 'core:product-detail' related_product.pid %}" class="btn btn-primary">View Details</a>
+                    {% endif %}
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ related_product.product_title }}</h5>
+                    <div class="price-container mt-auto">
+                        {% if related_product.discounted_price < related_product.normal_price %}
+                        <p class="card-text mb-2">
+                            <span class="current-price">sh.{{ related_product.discounted_price|intcomma }}</span>
+                            <small class="original-price"><s>sh.{{ related_product.normal_price|intcomma }}</s></small>
+                        </p>
+                        <span class="discount-badge">{{ related_product.get_percent_discount }}% off</span>
+                        {% else %}
+                        <p class="card-text mb-2">
+                            <span class="current-price">sh.{{ related_product.normal_price|intcomma }}</span>
+                        </p>
+                        {% endif %}
                     </div>
+                    <a href="{% url 'core:product-detail' related_product.pid %}" class="btn btn-primary mt-2">View Details</a>
                 </div>
             </div>
+        </div>
         {% endfor %}
     </div>
 </div>

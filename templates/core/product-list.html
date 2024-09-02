@@ -72,16 +72,15 @@
     </div>
     
     <div class="d-flex justify-content-between align-items-center my-4">
-        <p>We found {{ products.count }} items for you!</p>
-        <div class="d-flex">
-            <select id="sort-select" class="form-select">
-                <option value="updated">Sort by: Featured</option>
-                <option value="price_asc">Sort by: Price (Low to High)</option>
-                <option value="price_desc">Sort by: Price (High to Low)</option>
-            </select>
+        <div>
+            We found {{ products.count }} items for you!
+        </div>
+        <div class="d-flex sorting-dropdown">
+            {% include 'core/async/sort-options.html' %}
         </div>
     </div>
-    <main class=" container main bd-grid">
+    </div>
+    <div class="container main bd-grid" role="main">
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="filtered-products">
             {% for p in products %}
             <div class="col">
@@ -129,7 +128,10 @@
             </div>
             {% endfor %}
         </div>
-    </main>
+        <div id="pagination" class="d-flex justify-content-center my-4">
+            {% include 'core/async/pagination.html' %}
+        </div>
+    </div>
     
     <!--Customer reviews-->
     <h2 class="text-center mb-4 mt-5">Customer Reviews</h2>

@@ -38,9 +38,15 @@
                                 <li><a class="dropdown-item" href="#">Product 2</a></li>
                             </ul>
                         </div>
-                        <button class="btn btn-outline-dark me-2 mb-2" type="button">
-                            <i class="bi bi-cart-plus-fill"></i> Cart
-                        </button>
+                        <div class="btn-group me-2 mb-2 position-relative">
+                            <button type="button" class="btn btn-outline-dark">
+                                <i class="bi bi-cart-plus-fill"></i> Cart
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-counter">
+                                    0
+                                </span>
+                            </button>
+                            <!-- Add a dropdown menu for cart items here if needed -->
+                        </div>
                         <div class="btn-group me-2 mb-2">
                             <button class="btn btn-outline-dark dropdown-toggle" type="button" id="wishlistDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-suit-heart-fill"></i> Wishlist

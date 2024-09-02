@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.contrib import messages
 from .models import *
 from .forms import VendorReviewForm, ProductReviewForm, SearchForm
-from django.db.models import Q
+from django.db.models import Q, Min, Max, F, Sum
 from django.db.models import Avg
 from django.http import JsonResponse
 from django.conf import settings
@@ -12,8 +12,7 @@ from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
-from django.core.paginator import Paginator
-from django.db.models import Min, Max
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 # Create your views here.
 @csrf_exempt
@@ -60,8 +59,29 @@ def index(request):
     return render(request, 'core/index.html', context)
 
 def product_list_view(request):
-    products= Product.objects.filter(product_status="published").order_by("-updated")
-    return render(request, 'core/product-list.html', {'products': products})
+    products = Product.objects.filter(product_status="published").order_by("-updated")
+    paginator = Paginator(products, 12)
+    page_number = request.GET.get('page', 1)
+
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        # If the page parameter is not an integer, default to the first page
+        page_obj = paginator.get_page(1)
+    except EmptyPage:
+        # If the page parameter is out of range, return the last page
+        page_obj = paginator.get_page(paginator.num_pages)
+
+    context = {
+        'products': page_obj.object_list,
+        'page_obj': page_obj,
+        'min_price': products.aggregate(Min('discounted_price'))['discounted_price__min'],
+        'max_price': products.aggregate(Max('discounted_price'))['discounted_price__max'],
+        'categories': Category.objects.all(),
+        'vendors': Vendor.objects.all(),
+        'tags': Tags.objects.all(),
+    }
+    return render(request, 'core/product-list.html', context)
 
 def category_list(request):
     categories = Category.objects.all()
@@ -99,9 +119,8 @@ def tag_products(request, tag_slug):
 
 def vendor_detail(request, vid):
     vendor = get_object_or_404(Vendor, vid=vid)
-    reviews = VendorReview.objects.filter(vendor=vendor)
+    reviews = VendorReview.objects.filter(vendor=vendor).order_by('-created_at')
     products = Product.objects.filter(vendor=vendor, product_status="published", in_stock=True)[:8]
-
 
     existing_review = None
     if request.user.is_authenticated:
@@ -109,7 +128,7 @@ def vendor_detail(request, vid):
 
     if request.method == 'POST':
         if not request.user.is_authenticated:
-            return redirect(reverse('userauths:sign-in'))
+            return redirect('userauths:sign-in')
         
         if existing_review:
             messages.error(request, 'You have already reviewed this vendor!')
@@ -121,9 +140,10 @@ def vendor_detail(request, vid):
             review.vendor = vendor
             review.user = request.user
             review.save()
+            messages.success(request, 'Your review has been submitted successfully!')
             return redirect('core:vendor-detail', vid=vid)
     else:
-        review_form = VendorReviewForm(initial={'vendor': vendor})
+        review_form = VendorReviewForm()
 
     context = {
         'vendor': vendor,
@@ -172,6 +192,23 @@ def product_detail(request, pid):
     return render(request, 'core/product-detail.html', context)
 
 @login_required
+def get_cart_items(request):
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_items = CartItem.objects.filter(cart=cart).annotate(
+        total_price=F('quantity') * F('product__discounted_price')
+    ).values('product__product_title', 'quantity', 'total_price')
+
+    cart_total = cart_items.aggregate(Sum('total_price'))['total_price__sum'] or 0
+    cart_count = cart_items.aggregate(Sum('quantity'))['quantity__sum'] or 0
+
+    return JsonResponse({
+        'status': 'success',
+        'cart_items': list(cart_items),
+        'cart_total': cart_total,
+        'cart_count': cart_count,
+    })
+
+@login_required
 def add_to_cart(request, pid):
     if request.method == 'POST':
         product = get_object_or_404(Product, pid=pid)
@@ -182,7 +219,20 @@ def add_to_cart(request, pid):
             cart_item.quantity += 1
             cart_item.save()
 
-        return JsonResponse({'status': 'success', 'message': 'Product added to cart'})
+        cart_items = CartItem.objects.filter(cart=cart).annotate(
+            total_price=F('quantity') * F('product__discounted_price')
+        ).values('product__product_title', 'quantity', 'total_price')
+
+        cart_total = cart_items.aggregate(Sum('total_price'))['total_price__sum'] or 0
+        cart_count = cart_items.aggregate(Sum('quantity'))['quantity__sum'] or 0
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Product added to cart',
+            'cart_items': list(cart_items),
+            'cart_total': cart_total,
+            'cart_count': cart_count,
+        })
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 @login_required
@@ -202,13 +252,15 @@ def buy_now(request, pid):
 
     return redirect('core:checkout', pid=pid)
 
-def filter_products(request):
+def filter_and_sort_products(request):
     categories = request.GET.getlist('category[]')
     vendors = request.GET.getlist('vendor[]')
     price = request.GET.get('price')
-   
-    products = Product.objects.filter(product_status="published").distinct()
-   
+    sort_option = request.GET.get('sort', 'default')
+    page = request.GET.get('page', 1)
+
+    products = Product.objects.filter(product_status="published", in_stock=True)
+
     if categories:
         products = products.filter(category__cid__in=categories)
 
@@ -218,8 +270,30 @@ def filter_products(request):
     if price:
         products = products.filter(discounted_price__lte=float(price))
 
+    # Apply sorting
+    if sort_option == 'price_low_to_high':
+        products = products.order_by('discounted_price')
+    elif sort_option == 'price_high_to_low':
+        products = products.order_by('-discounted_price')
+    else:
+        products = products.order_by('-updated')
+
+    # Pagination
+    paginator = Paginator(products, 12)
+    try:
+        page_obj = paginator.get_page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.get_page(1)
+    except EmptyPage:
+        page_obj = paginator.get_page(paginator.num_pages)
+
     data = render_to_string('core/async/filtered-products.html', {
-        "products": products
+        "products": page_obj.object_list
     })
 
-    return JsonResponse({"data": data})
+    pagination = render_to_string('core/async/pagination.html', {
+        "page_obj": page_obj
+    })
+
+    return JsonResponse({"data": data, "pagination": pagination})
+

@@ -1,34 +1,60 @@
 {% extends "partials/base.html" %}
+{% load static %}
+
+{% block title %}
+<title>Products tagged with "{{ tag.name }}" - BLUST BY DR MA</title> 
+{% endblock title %}
+
+{% block extra-css %}
+<link rel="stylesheet" href="{% static 'assets/css/tags-card.css' %}">
+{% endblock extra-css %}
 
 {% block content %}
 <div class="container">
-    <h1>Products tagged with "{{ tag.name }}"</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:index' %}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Tag: {{ tag.name }}</li>
+        </ol>
+    </nav>
+
+    <h2 class="text-center mb-4">Products tagged with "{{ tag.name }}" ({{ products.count }})</h2>
 
     {% if products %}
-        <div class="row">
-            {% for product in products %}
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.product_title }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ product.product_title }}</h5>
-                            <p class="card-text">
-                            {% if product.discounted_price < product.normal_price %}
-                                <h2 class="mb-2">sh.{{ product.discounted_price }}</h2>
-                                <p class="mb-1"><span class="text-danger"><del>sh.{{ product.normal_price }}</del></span></p>
-                                <p class="text-muted">{{ product.get_percent_discount }}% off</p>
-                            {% else %}
-                                <h2 class="mb-2">sh.{{ product.normal_price }}</h2>
-                            {% endif %}
-                            </p>
-                            <a href="{% url 'core:product-detail' product.pid %}" class="btn btn-primary">View Product</a>
-                        </div>
-                    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for product in products %}
+        <div class="col">
+            <div class="card h-100 product-card">
+                <div class="card-img-container">
+                    {% if product.product_image %}
+                    <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.product_title }}">
+                    {% endif %}
                 </div>
-            {% endfor %}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ product.product_title }}</h5>
+                    <div class="price-container mt-auto">
+                        {% if product.discounted_price < product.normal_price %}
+                        <p class="card-text mb-2">
+                            <span class="current-price">sh.{{ product.discounted_price }}</span>
+                            <small class="original-price"><s>sh.{{ product.normal_price }}</s></small>
+                        </p>
+                        <span class="discount-badge">{{ product.get_percent_discount }}% off</span>
+                        {% else %}
+                        <p class="card-text mb-2">
+                            <span class="current-price">sh.{{ product.normal_price }}</span>
+                        </p>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'core:product-detail' product.pid %}" class="btn btn-primary mt-2">View Product</a>
+                </div>
+            </div>
         </div>
+        {% endfor %}
+    </div>
     {% else %}
-        <p>No products found for this tag.</p>
+    <div class="alert alert-info" role="alert">
+        No products found for this tag.
+    </div>
     {% endif %}
 </div>
-{% endblock %}
+{% endblock content %}

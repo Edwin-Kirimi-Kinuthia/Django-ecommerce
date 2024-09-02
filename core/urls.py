@@ -23,6 +23,7 @@ urlpatterns = [
     #Product detail
     path('product/<str:pid>/', views.product_detail, name='product-detail'),
     #Add to cart
+    path('get-cart-items/', views.get_cart_items, name='get-cart-items'),
     path('add-to-cart/<str:pid>/', views.add_to_cart, name='add-to-cart'),
     #Add to wishlist
     path('add-to-wishlist/<str:pid>/', views.add_to_wishlist, name='add-to-wishlist'),
@@ -30,6 +31,7 @@ urlpatterns = [
     path('buy-now/<str:pid>/', views.buy_now, name='buy-now'),
     #Tinymce
     path('upload_image/', views.upload_image, name='upload_image'),
-    # filter products
-    path('filter-products/', views.filter_products, name='filter-products'),
+    # filter products and sort products
+    path('filter-and-sort-products/', views.filter_and_sort_products, name='filter-and-sort-products'),
+    
 ]

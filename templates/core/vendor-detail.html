@@ -4,7 +4,7 @@
 {% load humanize %}
 
 {% block title %}
- <title> {{ vendor.vendor_title }} - BLUST BY DR MA </title>
+<title>{{ vendor.vendor_title }} - BLUST BY DR MA</title>
 {% endblock title %}
 
 {% block extra-css %}
@@ -12,86 +12,187 @@
 {% endblock extra-css %}
 
 {% block content %}
-<div class="container">
-    <div class="row mt-5">
+<div class="container mt-5">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
         <div class="col-md-4 mb-4">
             <div class="vendor-image">
-                <img src="{{ vendor.vendor_image.url }}" alt="{{ vendor.vendor_title }}">
+                <img src="{{ vendor.vendor_image.url }}" alt="{{ vendor.vendor_title }}" class="img-fluid rounded">
             </div>
         </div>
-
         <div class="col-md-8">
             <h1>{{ vendor.vendor_title }}</h1>
-
-            <div class="d-flex align-items-center mb-3">
-                <div class="star-rating" data-rating="{{ vendor.rating }}"></div>
-                <span class="ms-2">Rating: {{ vendor.rating|floatformat:1 }}</span>
+            <div class="mb-3">
+                <strong>Average Rating:</strong>
+                {% if vendor.rating %}
+                    {{ vendor.rating|floatformat:1 }}
+                    {% with ''|center:vendor.rating|stringformat:'s' as stars %}
+                        {% for _ in stars %}⭐{% endfor %}
+                    {% endwith %}
+                    {% with ''|center:5|stringformat:'s' as empty_stars %}
+                        {% for _ in empty_stars %}{% if forloop.counter > vendor.rating %}☆{% endif %}{% endfor %}
+                    {% endwith %}
+                {% else %}
+                    No ratings yet
+                {% endif %}
             </div>
-
-            <p><strong>Address:</strong> {{ vendor.vendor_adress }}</p>
-            <p><strong>Contact:</strong> {{ vendor.vendor_contact }}</p>
-            <p><strong>Chat Response Time:</strong> {{ vendor.vendor_chat_resp_time }}</p>
-            <p><strong>Shipping On Time:</strong> {{ vendor.shipping_on_time }}</p>
-            <p><strong>Authenticity Rating:</strong> {{ vendor.authentic_rating }}</p>
-            <p><strong>Days for Return:</strong> {{ vendor.days_return }}</p>
-            <p><strong>Warranty Period:</strong> {{ vendor.warranty_period }}</p>
-
-            <p>{{ vendor.description }}</p>
+            <div class="vendor-details mb-3">
+                <p><strong>Address:</strong> {{ vendor.vendor_adress }}</p>
+                <p><strong>Contact:</strong> {{ vendor.vendor_contact }}</p>
+                <p><strong>Chat Response Time:</strong> {{ vendor.vendor_chat_resp_time }}</p>
+                <p><strong>Shipping On Time:</strong> {{ vendor.shipping_on_time }}</p>
+                <p><strong>Authenticity Rating:</strong> {{ vendor.authentic_rating }}</p>
+                <p><strong>Days for Return:</strong> {{ vendor.days_return }}</p>
+                <p><strong>Warranty Period:</strong> {{ vendor.warranty_period }}</p>
+            </div>
+            <div class="vendor-description">
+                <h3>About {{ vendor.vendor_title }}</h3>
+                {{ vendor.description|safe }}
+            </div>
         </div>
     </div>
 
-    <div class="mt-5">
-        <h2 class="mb-4">Products by {{ vendor.vendor_title }} ({{products.count}})</h2>
-        <div class="product-grid">
-            {% for product in products %}
-            <div class="product-card">
-                <img src="{{ product.product_image.url }}" alt="{{ product.product_title }}" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title">{{ product.product_title }}</h3>
-                    <p class="product-price">sh.{{ product.discounted_price|floatformat:2|intcomma }}</p>
-                    <a href="{% url 'core:product-detail' product.pid %}" class="btn-view-product">View Product</a>
-                </div>
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="mb-4">Products by {{ vendor.vendor_title }} ({{products.count}})</h2>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                {% for product in products %}
+                    <div class="col">
+                        <div class="card h-100 product-card">
+                            <div class="card-img-container">
+                                {% if product.product_image %}
+                                    <img src="{{ product.product_image.url }}" alt="{{ product.product_title }}" class="card-img-top">
+                                {% endif %}
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ product.product_title }}</h5>
+                                <div class="price-container mt-auto">
+                                    {% if product.discounted_price < product.normal_price %}
+                                        <span class="current-price">sh.{{ product.discounted_price|intcomma }}</span>
+                                        <span class="small text-muted"><s>sh.{{ product.normal_price|intcomma }}</s></span>
+                                        <span class="discount-badge">{{ product.get_percent_discount }}% off</span>
+                                    {% else %}
+                                        <span class="current-price">sh.{{ product.normal_price|intcomma }}</span>
+                                    {% endif %}
+                                </div>
+                                <a href="{% url 'core:product-detail' product.pid %}" class="btn btn-primary mt-2">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="no-products">No products available from this vendor at the moment.</p>
+                {% endfor %}
             </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-8">
+            <h3>Reviews ({{reviews.count}})</h3>
+            {% for review in reviews %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ review.user.username|title }}</h5>
+                        {{ review.review_text|safe }}
+                        <div>
+                            {% with ''|center:review.rating as stars %}
+                                {% for _ in stars %}⭐{% endfor %}
+                            {% endwith %}
+                            {% with ''|center:5|stringformat:'s' as empty_stars %}
+                                {% for _ in empty_stars %}{% if forloop.counter > review.rating %}☆{% endif %}{% endfor %}
+                            {% endwith %}
+                        </div>
+                        <small>{{ review.created_at|date:"F d, Y" }}</small>
+                    </div>
+                </div>
             {% empty %}
-            <p>No products available from this vendor at the moment.</p>
+                <p>No reviews yet. Be the first to review this vendor!</p>
             {% endfor %}
         </div>
-    </div>
-
-    <div class="mt-5">
-        <h2 class="mb-4">Vendor Reviews</h2>
-
-        {% for review in reviews %}
-        <div class="review-card">
-            <div class="review-header">
-                <h5 class="review-author">{{ review.user.username }}</h5>
-                <div class="star-rating" data-rating="{{ review.rating }}"></div>
-            </div>
-            <p class="review-text">{{ review.review_text }}</p>
-            <small class="review-date">{{ review.created_at|date:"F d, Y" }}</small>
-        </div>
-        {% empty %}
-        <p>No reviews yet. Be the first to review this vendor!</p>
-        {% endfor %}
-
-        {% if user.is_authenticated and not existing_review %}
-        <div class="review-form">
+        <div class="col-md-4">
             <h3>Write a Review</h3>
-            <form method="post">
-                {% csrf_token %}
-                {{ review_form.as_p }}
-                <button type="submit" class="btn-submit-review">Submit Review</button>
-            </form>
+            {% if user.is_authenticated %}
+                {% if not existing_review %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ review_form.review_text.label_tag }}
+                            {{ review_form.review_text|add_class:"form-control" }}
+                        </div>
+                        <div class="mb-3">
+                            {{ review_form.rating.label_tag }}
+                            {{ review_form.rating|add_class:"form-select" }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </form>
+                {% else %}
+                    <p>You have already reviewed this vendor.</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Your Review</h5>
+                            {{ existing_review.review_text|safe }}
+                            <div>
+                                {% with ''|center:existing_review.rating as stars %}
+                                    {% for _ in stars %}⭐{% endfor %}
+                                {% endwith %}
+                                {% with ''|center:5|stringformat:'s' as empty_stars %}
+                                    {% for _ in empty_stars %}{% if forloop.counter > existing_review.rating %}☆{% endif %}{% endfor %}
+                                {% endwith %}
+                            </div>
+                            <small>{{ existing_review.created_at|date:"F d, Y" }}</small>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <p>Please <a href="{% url 'userauths:sign-in' %}">log in</a> to write a review.</p>
+            {% endif %}
         </div>
-        {% elif not user.is_authenticated %}
-        <p>Please <a href="{% url 'userauths:sign-in' %}">log in</a> to write a review.</p>
-        {% else %}
-        <p>You have already reviewed this vendor.</p>
-        {% endif %}
     </div>
 </div>
 {% endblock content %}
-
 {% block extra-script %}
-<script src="{% static 'assets/JS/vendor-detail.js' %}"></script>
+<!-- Tinymce-->
+<script src="https://cdn.tiny.cloud/1/v4xitv0corewvqph7tgecob94g6rs2jhuca28gszeev523ms/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+tinymce.init({
+    selector: 'textarea',
+    plugins: 'image media link code lists',
+    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | code',
+    images_upload_url: '/upload_image/',
+    automatic_uploads: true,
+    file_picker_types: 'image',
+    images_upload_handler: function (blobInfo, success, failure) {
+        var xhr, formData;
+        xhr = new XMLHttpRequest();
+        xhr.open('POST', '/upload_image/');
+        xhr.onload = function() {
+            var json;
+            if (xhr.status != 200) {
+                failure('HTTP Error: ' + xhr.status);
+                return;
+            }
+            json = JSON.parse(xhr.responseText);
+            if (!json || typeof json.location != 'string') {
+                failure('Invalid JSON: ' + xhr.responseText);
+                return;
+            }
+            success(json.location);
+        };
+        xhr.onerror = function() {
+            failure('Image upload failed due to a XHR error');
+        };
+        formData = new FormData();
+        formData.append('file', blobInfo.blob(), blobInfo.filename());
+        xhr.send(formData);
+    }
+});
+</script>
+<!--end Tinymce-->
 {% endblock extra-script %}
