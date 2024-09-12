@@ -39,13 +39,28 @@
                             </ul>
                         </div>
                         <div class="btn-group me-2 mb-2 position-relative">
-                            <button type="button" class="btn btn-outline-dark">
+                            <button type="button" class="btn btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="bi bi-cart-plus-fill"></i> Cart
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-counter">
                                     0
                                 </span>
                             </button>
-                            <!-- Add a dropdown menu for cart items here if needed -->
+                        
+                            <!-- Dropdown for Cart -->
+                            <div class="dropdown-menu dropdown-menu-end cart-dropdown p-3">
+                                <div id="cartItems" class="cart-items-container">
+                                    <p class="text-muted text-center">Your cart is empty</p> <!-- Displayed when there are no items -->
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <div class="d-flex justify-content-between align-items-center px-3 py-2">
+                                    <span>Total:</span>
+                                    <span id="cartTotal">sh.0.00</span>
+                                </div>
+                                <div class="d-grid gap-2 px-3 pb-2">
+                                    <a href="#" class="btn btn-primary btn-sm">View Cart</a>
+                                    <a href="#" class="btn btn-success btn-sm">Checkout</a>
+                                </div>
+                            </div>
                         </div>
                         <div class="btn-group me-2 mb-2">
                             <button class="btn btn-outline-dark dropdown-toggle" type="button" id="wishlistDropdown" data-bs-toggle="dropdown" aria-expanded="false">

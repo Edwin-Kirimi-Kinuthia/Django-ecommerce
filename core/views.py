@@ -1,3 +1,4 @@
+import json
 import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -192,36 +193,34 @@ def product_detail(request, pid):
     return render(request, 'core/product-detail.html', context)
 
 @login_required
-def get_cart_items(request):
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_items = CartItem.objects.filter(cart=cart).annotate(
-        total_price=F('quantity') * F('product__discounted_price')
-    ).values('product__product_title', 'quantity', 'total_price')
-
-    cart_total = cart_items.aggregate(Sum('total_price'))['total_price__sum'] or 0
-    cart_count = cart_items.aggregate(Sum('quantity'))['quantity__sum'] or 0
-
-    return JsonResponse({
-        'status': 'success',
-        'cart_items': list(cart_items),
-        'cart_total': cart_total,
-        'cart_count': cart_count,
-    })
-
-@login_required
 def add_to_cart(request, pid):
     if request.method == 'POST':
         product = get_object_or_404(Product, pid=pid)
-        cart, created = Cart.objects.get_or_create(user=request.user)
-        cart_item, item_created = CartItem.objects.get_or_create(cart=cart, product=product)
-        
-        if not item_created:
-            cart_item.quantity += 1
-            cart_item.save()
+        quantity = int(request.POST.get('quantity', 1))
 
+        # Create or retrieve the cart
+        cart, created = Cart.objects.get_or_create(user=request.user)
+
+        # Create or update the CartItem
+        cart_item, item_created = CartItem.objects.get_or_create(cart=cart, product=product)
+        if not item_created:
+            cart_item.quantity += quantity
+        else:
+            cart_item.quantity = quantity
+
+        cart_item.save()
+
+        # Calculate cart totals
         cart_items = CartItem.objects.filter(cart=cart).annotate(
             total_price=F('quantity') * F('product__discounted_price')
-        ).values('product__product_title', 'quantity', 'total_price')
+        ).values('product__product_title', 'product__product_image', 'quantity', 'total_price', 'id')
+
+        # Add image URLs to cart items
+        for item in cart_items:
+            if item['product__product_image']:
+                item['product__product_image_url'] = f"{settings.MEDIA_URL}{item['product__product_image']}"
+            else:
+                item['product__product_image_url'] = None
 
         cart_total = cart_items.aggregate(Sum('total_price'))['total_price__sum'] or 0
         cart_count = cart_items.aggregate(Sum('quantity'))['quantity__sum'] or 0
@@ -230,10 +229,92 @@ def add_to_cart(request, pid):
             'status': 'success',
             'message': 'Product added to cart',
             'cart_items': list(cart_items),
-            'cart_total': cart_total,
+            'cart_total': float(cart_total),
             'cart_count': cart_count,
         })
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+@login_required
+def get_cart_items(request):
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_items = CartItem.objects.filter(cart=cart).annotate(
+        total_price=F('quantity') * F('product__discounted_price')
+    ).values('product__product_title', 'product__product_image', 'quantity', 'total_price', 'id')
+
+    # Correctly generate the image URLs
+    for item in cart_items:
+        if item['product__product_image']:  # Check if the image field exists
+            item['product__product_image_url'] = f"{settings.MEDIA_URL}{item['product__product_image']}"
+        else:
+            item['product__product_image_url'] = None  # If no image is present, return None
+
+    cart_total = cart_items.aggregate(Sum('total_price'))['total_price__sum'] or 0
+    cart_count = cart_items.aggregate(Sum('quantity'))['quantity__sum'] or 0
+
+    return JsonResponse({
+        'status': 'success',
+        'cart_items': list(cart_items),
+        'cart_total': float(cart_total),
+        'cart_count': cart_count,
+    })
+
+
+@login_required
+@csrf_exempt
+def update_cart_item(request, item_id):
+    if request.method == 'POST':
+        try:
+            cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+            data = json.loads(request.body)
+            quantity = int(data.get('quantity', 1))
+
+            if quantity > 0:
+                cart_item.quantity = quantity
+                cart_item.save()
+
+                # Recalculate cart totals
+                cart_items = CartItem.objects.filter(cart=cart_item.cart).annotate(
+                    total_price=F('quantity') * F('product__discounted_price')
+                ).values('product__product_title', 'product__product_image', 'quantity', 'total_price', 'id')
+
+                cart_total = cart_items.aggregate(Sum('total_price'))['total_price__sum'] or 0
+                cart_count = cart_items.aggregate(Sum('quantity'))['quantity__sum'] or 0
+
+                return JsonResponse({
+                    'status': 'success',
+                    'cart_items': list(cart_items),
+                    'cart_total': float(cart_total),
+                    'cart_count': cart_count,
+                })
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Invalid quantity'}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+@login_required
+@csrf_exempt
+def remove_cart_item(request, item_id):
+    if request.method == 'POST':
+        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+        cart_item.delete()
+
+        # Recalculate cart totals
+        cart_items = CartItem.objects.filter(cart=cart_item.cart).annotate(
+            total_price=F('quantity') * F('product__discounted_price')
+        ).values('product__product_title', 'product__product_image', 'quantity', 'total_price', 'id')
+
+        cart_total = cart_items.aggregate(Sum('total_price'))['total_price__sum'] or 0
+        cart_count = cart_items.aggregate(Sum('quantity'))['quantity__sum'] or 0
+
+        return JsonResponse({
+            'status': 'success',
+            'cart_items': list(cart_items),
+            'cart_total': float(cart_total),
+            'cart_count': cart_count,
+        })
+    return JsonResponse({'status': 'error'}, status=400)
 
 @login_required
 def add_to_wishlist(request, pid):

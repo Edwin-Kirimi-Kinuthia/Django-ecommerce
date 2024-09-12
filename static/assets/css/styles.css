@@ -121,3 +121,93 @@
 .btn-group .position-relative {
     display: inline-flex;
 }
+
+
+/* Cart Dropdown Styling */
+.cart-dropdown {
+    min-width: 350px;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #ffffff;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Individual cart item styling */
+.cart-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+/* Styling for cart item image and title */
+.cart-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cart-item-info img {
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.item-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+/* Cart item controls styling */
+.cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Quantity input box styling */
+.quantity-input {
+    width: 50px;
+    text-align: center;
+}
+
+/* Styling for the delete button */
+.remove-cart-item {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.remove-cart-item i {
+    font-size: 1rem;
+}
+
+/* Styling for the item price */
+.item-price {
+    min-width: 70px;
+    text-align: right;
+}
+
+/* Make cart dropdown responsive */
+@media (max-width: 575.98px) {
+    .cart-dropdown {
+        min-width: 100%;
+    }
+    
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .cart-item-info {
+        margin-bottom: 10px;
+    }
+    
+    .cart-item-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

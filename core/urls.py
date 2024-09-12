@@ -22,9 +22,11 @@ urlpatterns = [
     path('tag/<slug:tag_slug>/', views.tag_products, name='tag-products'),
     #Product detail
     path('product/<str:pid>/', views.product_detail, name='product-detail'),
-    #Add to cart
-    path('get-cart-items/', views.get_cart_items, name='get-cart-items'),
+    #Cart functionalities
     path('add-to-cart/<str:pid>/', views.add_to_cart, name='add-to-cart'),
+    path('get-cart-items/', views.get_cart_items, name='get-cart-items'),
+    path('update-cart-item/<int:item_id>/', views.update_cart_item, name='update-cart-item'),
+    path('remove-cart-item/<int:item_id>/', views.remove_cart_item, name='remove-cart-item'),
     #Add to wishlist
     path('add-to-wishlist/<str:pid>/', views.add_to_wishlist, name='add-to-wishlist'),
     #Buy now

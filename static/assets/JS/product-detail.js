@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainImageContainer = document.querySelector('.main-image-container');
     const thumbnails = document.querySelectorAll('.thumbnail');
     const thumbnailsContainer = document.querySelector('.thumbnails');
-    
+
     let isZoomed = false;
     let zoomLevel = 2.5;
 
@@ -39,54 +39,23 @@ document.addEventListener('DOMContentLoaded', function() {
         mainImage.style.transform = 'scale(1)';
     });
 
-    // Thumbnail scroll functionality
-    let scrollPosition = 0;
-    const scrollStep = 70; // Adjust based on thumbnail width + margin
-
-    function scrollThumbnails(direction) {
-        const maxScroll = thumbnailsContainer.scrollWidth - thumbnailsContainer.clientWidth;
-        if (direction === 'left') {
-            scrollPosition = Math.max(scrollPosition - scrollStep, 0);
-        } else {
-            scrollPosition = Math.min(scrollPosition + scrollStep, maxScroll);
-        }
-        thumbnailsContainer.style.transform = `translateX(-${scrollPosition}px)`;
-    }
-
-    // Add scroll buttons if needed
-    const thumbnailsWrapper = document.querySelector('.thumbnails-container');
-    if (thumbnailsContainer.scrollWidth > thumbnailsWrapper.clientWidth) {
-        const leftButton = document.createElement('button');
-        leftButton.textContent = '<';
-        leftButton.classList.add('thumbnail-scroll-button', 'left');
-        leftButton.addEventListener('click', () => scrollThumbnails('left'));
-
-        const rightButton = document.createElement('button');
-        rightButton.textContent = '>';
-        rightButton.classList.add('thumbnail-scroll-button', 'right');
-        rightButton.addEventListener('click', () => scrollThumbnails('right'));
-
-        thumbnailsWrapper.appendChild(leftButton);
-        thumbnailsWrapper.appendChild(rightButton);
-    }
-
     // Cart functionality
     const cartCounter = document.querySelector('.cart-counter');
     const cartItemsContainer = document.getElementById('cartItems');
     const cartTotalElement = document.getElementById('cartTotal');
-    const cartIcon = document.querySelector('.cart-icon');
 
     function updateCartDisplay(cartItems, cartTotal, cartCount) {
         cartCounter.textContent = cartCount;
-        cartTotalElement.textContent = cartTotal.toFixed(2);
+        cartCounter.style.display = cartCount > 0 ? 'inline' : 'none';
+        cartTotalElement.textContent = `sh.${cartTotal.toFixed(2)}`;
 
         cartItemsContainer.innerHTML = '';
         cartItems.forEach(item => {
             const itemElement = document.createElement('div');
-            itemElement.className = 'cart-item';
+            itemElement.className = 'cart-item d-flex justify-content-between';
             itemElement.innerHTML = `
                 <span>${item.product__product_title} x ${item.quantity}</span>
-                <span>$${item.total_price.toFixed(2)}</span>
+                <span>sh.${Number(item.total_price).toFixed(2)}</span>
             `;
             cartItemsContainer.appendChild(itemElement);
         });
@@ -118,33 +87,19 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchCartItems();
 
     // Add to cart functionality
-    const addToCartButtons = document.querySelectorAll('.add-to-cart');
-    const quantityInputs = document.querySelectorAll('.quantity-input');
-
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', function() {
+    const addToCartButton = document.querySelector('.add-to-cart');
+    if (addToCartButton) {
+        addToCartButton.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent default form submit
             const productId = this.dataset.productId;
             const productName = this.dataset.productName;
             const productPrice = this.dataset.productPrice;
             const quantityInput = this.closest('.add-to-cart-container').querySelector('.quantity-input');
             const quantity = parseInt(quantityInput.value);
+
             addToCart(productId, productName, productPrice, quantity);
         });
-    });
-
-    quantityInputs.forEach(input => {
-        input.addEventListener('input', function() {
-            const max = parseInt(this.max);
-            const value = parseInt(this.value);
-            if (value > max) {
-                this.value = max;
-            }
-            if (value < 1) {
-                this.value = 1;
-            }
-        });
-    });
-
+    }
 
     function addToCart(productId, productName, productPrice, quantity) {
         fetch(`/add-to-cart/${productId}/`, {
@@ -153,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-CSRFToken': getCookie('csrftoken'),
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 quantity: quantity,
                 product_name: productName,
                 product_price: productPrice
@@ -174,14 +129,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Quantity input validation
+    const quantityInput = document.querySelector('.quantity-input');
+    if (quantityInput) {
+        quantityInput.addEventListener('input', function() {
+            const max = parseInt(this.max);
+            const value = parseInt(this.value);
+            if (value > max) {
+                this.value = max;
+            }
+            if (value < 1) {
+                this.value = 1;
+            }
+        });
+    }
+
     // Add to wishlist functionality
-    const addToWishlistButtons = document.querySelectorAll('.add-to-wishlist');
-    addToWishlistButtons.forEach(button => {
-        button.addEventListener('click', function() {
+    const addToWishlistButton = document.querySelector('.add-to-wishlist');
+    if (addToWishlistButton) {
+        addToWishlistButton.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent default form submit
             const productId = this.dataset.productId;
             addToWishlist(productId);
         });
-    });
+    }
 
     function addToWishlist(productId) {
         fetch(`/add-to-wishlist/${productId}/`, {
@@ -211,8 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
         notification.textContent = message;
         document.body.appendChild(notification);
 
-        // Trigger reflow
-        notification.offsetHeight;
+        notification.offsetHeight; // Trigger reflow
 
         notification.classList.add('show');
 
@@ -224,6 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
 
+    // Helper function to get CSRF token
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
